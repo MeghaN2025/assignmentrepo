@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Thresholds
+CPU_THRESHOLD=80
+MEM_THRESHOLD=80
+
+# Log file
+LOG_FILE="/var/log/resource_monitor.log"
+
+# Alert command - customize as needed (e.g., mail, notify-send, etc.)
+send_alert() {
+    echo "[$(date)] ALERT: $1 usage exceeded threshold: $2%" >> "$LOG_FILE"
+}
+
+# Get current usage
+CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}')
+MEM_USAGE=$(free | awk '/Mem:/ {printf("%.2f"), $3/$2 * 100}')
+
+# Log with timestamp
+echo "[$(date)] CPU: ${CPU_USAGE}% | Memory: ${MEM_USAGE}%" >> "$LOG_FILE"
+
+# Check and alert
+if (( $(echo "$CPU_USAGE > $CPU_THRESHOLD" | bc -l) )); then
+    send_alert "CPU" "$CPU_USAGE"
+fi
+
+if (( $(echo "$MEM_USAGE > $MEM_THRESHOLD" | bc -l) )); then
+    send_alert "Memory" "$MEM_USAGE"
+fi
