@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Step 1: Set the directory to search in
+SEARCH_DIR="${1:-.}"       # If user doesn't give a path, it uses current directory
+
+# Step 2: Set the file extension to search for
+EXT="${2:-.txt}"           # Default extension is ".txt"
+
+# Step 3: Create a folder named "backup"
+mkdir -p backup
+
+# Step 4: Find files and copy them with modified names
+find "$SEARCH_DIR" -type f -name "*$EXT" | while read -r FILE; do
+    # Get the relative path and replace slashes with underscores
+    CLEAN_NAME="${FILE//$'/'/_}"
+    
+    # Add '_backup' before the extension
+    BASE="${CLEAN_NAME%$EXT}"       # Remove the extension
+    NEW_NAME="${BASE}_backup$EXT"   # Add _backup before .txt
+
+    # Copy the file to backup folder
+    cp "$FILE" "backup/$NEW_NAME"
+done
+
+echo "✅ All $EXT files have been backed up to the 'backup' folder."
